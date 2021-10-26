@@ -1,4 +1,4 @@
-# Lp-ball Projection
+# Nonconvex Lp-ball Projection
 Implementation of a numerical algorithm for solving the Euclidean projection of a vector onto the nonconvex lp-ball. 
 
 Please refer to

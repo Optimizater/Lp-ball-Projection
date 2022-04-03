@@ -9,8 +9,8 @@ This lib contains utils to do l1-ball projection.
 import numpy as np
 
 
-def get_hyperplane_projection(point_to_be_projected_act, weights_act, radius) -> float:
-    """Gets the hyperplane projection of given point.
+def get_hyperplane_projection(point_to_be_projected_act: float, weights_act: float, radius: float) -> float:
+    """Gets the hyperplane projection of a given point.
     
     Args:
         point_to_be_projected_act: Point to be projected with positive components.
@@ -22,13 +22,16 @@ def get_hyperplane_projection(point_to_be_projected_act, weights_act, radius) ->
     
     """
     
+    EPS = np.finfo(np.float64).eps
+
     numerator = np.inner(weights_act, point_to_be_projected_act) - radius 
     denominator = np.inner(weights_act, weights_act) 
     
-    dual = np.divide(numerator, denominator + 2.22e-16) # compute the dual variable for the weighted l1-ball projection problem
+    dual = np.divide(numerator, denominator + EPS) # compute the dual variable for the weighted l1-ball projection problem
         
     x_sub = point_to_be_projected_act - dual * weights_act
-    return x_sub
+
+    return x_sub, dual
 
 
 def get_weightedl1_ball_projection(point_to_be_projected, weights, radius) -> float:
@@ -44,22 +47,24 @@ def get_weightedl1_ball_projection(point_to_be_projected, weights, radius) -> fl
     
     """
     signum = np.sign(point_to_be_projected)
-    point_to_be_projected_copy = signum * point_to_be_projected
+    point_to_be_projected_copy = np.float64(signum * point_to_be_projected)
     
-    act_ind = range(point_to_be_projected.shape[0])
+    
+    act_ind = [True] * point_to_be_projected.shape[0]
     
     # The loop of the weight l1-ball projection algorithm
     while True:
-        # Obtain the new projection to be projected by discarding the zeros 
+        # Discarding the zeros 
         point_to_be_projected_copy_act = point_to_be_projected_copy[act_ind]
         weights_act = weights[act_ind]
         
         # Perform projections in a reduced space R^{|act_ind|}
-        x_sol_hyper = get_hyperplane_projection(point_to_be_projected_copy_act, weights_act, radius)
+        x_sol_hyper, dual = get_hyperplane_projection(point_to_be_projected_copy_act, weights_act, radius)
         
-        # Ppdate the active index set
+        # Update the active index set
         point_to_be_projected_copy_act = np.maximum(x_sol_hyper, 0.0)
-        point_to_be_projected_copy[act_ind] = point_to_be_projected_copy_act
+
+        point_to_be_projected_copy[act_ind] = point_to_be_projected_copy_act.copy()
         
         act_ind = point_to_be_projected_copy > 0
 
@@ -70,4 +75,4 @@ def get_weightedl1_ball_projection(point_to_be_projected, weights, radius) -> fl
             x_opt = point_to_be_projected_copy * signum
             break
 
-    return x_opt
+    return x_opt, dual

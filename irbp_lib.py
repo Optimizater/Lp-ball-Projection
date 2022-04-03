@@ -6,18 +6,28 @@ Created on Mon Sep 27 09:58:49 2021
 @author: Xiangyu Yang
 """
 
+from timeit import default_timer as timer
+
 import numpy as np
 from numpy import linalg as LA
 
 import alternating_proj_lib
 
-def get_lp_ball_projection(starting_point, point_to_be_projected, p, radius, epsilon) -> float:
+
+def get_lp_ball_projection(starting_point: float, 
+                    point_to_be_projected: float, 
+                                        p: float, 
+                                   radius: float, 
+                                  epsilon: float,
+                                  tau=1.1, 
+                                  tol=1e-8, 
+                                  MAX_ITER=1000,**kwargs) -> float:
     
     """Gets the lp ball projection of given point.
 
     Args:
         point_to_be_projected: Point to be projected.
-        starting_point: Starting point of IRBP.
+        starting_point: Iterates of IRBP.
         p: p parameter for lp-ball.
         radius: The radius of lp-ball.
         epsilon: Initial value of the smoothing parameter epsilon.
@@ -27,87 +37,57 @@ def get_lp_ball_projection(starting_point, point_to_be_projected, p, radius, eps
         dual : The dual variable.
     """
 
-    # Step 1 and 2 in IRBP. Input parameters : note that our tolerance parameter are set as 1e-8
+    if LA.norm(point_to_be_projected, p) ** p <= radius:  
+        return point_to_be_projected, 0.0
+
+    # Step 1 and 2 in IRBP. 
     n = point_to_be_projected.shape[0]
 
-    tau, tol = 1.1, 1e-8
-    max_iteration_num = int(1e3)  # The maximal number of iterations
     condition_right = 100.0 # the right term of the condition for updating epsilon
 
     signum = np.sign(point_to_be_projected) 
-    bar_y = signum * point_to_be_projected  # bar_y lives in the positive orthant of R^n
-    
+    yAbs = signum * point_to_be_projected  # yAbs lives in the positive orthant of R^n
+
+    lamb = 0.0
+    residual_alpha0 = (1. / n) * LA.norm((yAbs - starting_point) * starting_point - p * lamb * starting_point ** p, 1)
+    residual_beta0 =  abs(LA.norm(starting_point, p) ** p - radius)
+
     cnt = 0  
-
-    x_final = np.zeros(n)
-
-    # store the info of residuals
-    res_alpha = []  # the optimal residual
-    res_beta = []  # the feasibility residual
-    
-    
-    if LA.norm(point_to_be_projected, p) ** p <= radius:  
-        return None
-    
     # The loop of IRBP
+    timeStart = timer()
     while True:
 
         cnt += 1
+        alpha_res = (1. / n) * LA.norm((yAbs - starting_point) * starting_point - p * lamb * starting_point ** p, 1)
+        beta_res = abs(LA.norm(starting_point, p) ** p - radius)
+
+        if max(alpha_res, beta_res) < tol * max(max(residual_alpha0, residual_beta0),\
+                                                              1.0) or cnt > MAX_ITER:
+            timeEnd = timer()
+            x_final = signum * starting_point # symmetric property of lp ball
+            break
 
         # Step 3 in IRBP. Compute the weights
         weights = p * 1. / ((np.abs(starting_point) + epsilon) ** (1 - p) + 1e-12)
 
         # Step 4 in IRBP. Solve the subproblem for x^{k+1}
-        gamma_k = radius - LA.norm(abs(starting_point) + epsilon, p) ** p + np.inner(weights, abs(starting_point))
+        gamma_k = radius - LA.norm(abs(starting_point) + epsilon, p) ** p + np.inner(weights, np.abs(starting_point))
 
         assert gamma_k > 0, "The current Gamma is non-positive"
 
         # Subproblem solver : The projection onto weighted l1-ball
-        x_new = alternating_proj_lib.get_weightedl1_ball_projection(bar_y, weights, gamma_k)
-
+        x_new, lamb = alternating_proj_lib.get_weightedl1_ball_projection(yAbs, weights, gamma_k)
+        x_new[np.isnan(x_new)] = np.zeros_like(x_new[np.isnan(x_new)])        
         
-        local_reduction = x_new - starting_point
-        
-        # Note that if x_new is not feasible to lp-ball, then we do a truncation using the last iterate
-
-        if LA.norm(x_new + epsilon, p) ** p > radius:
-            large_ = np.nonzero(local_reduction >= 0)
-            large_ = large_[0]
-            x_new[large_] = starting_point[large_]  # Truncation operation
-
         # Step 5 in IRBP. Set the new relaxation vector epsilon according to the proposed condition
-        condition_left = LA.norm(local_reduction, 2) * LA.norm(np.sign(local_reduction) * weights, 2) ** tau
+        condition_left = LA.norm(x_new - starting_point, 2) * LA.norm(np.sign(x_new - starting_point) * weights, 2) ** tau
         error_appro = abs(LA.norm(x_new, p) ** p - radius)  
 
         if condition_left <= condition_right:
-            theta = np.minimum(error_appro ** (1. / p), (1. / np.sqrt(cnt)) ** (1. / p))
+            theta = np.minimum(error_appro, 1. / np.sqrt(cnt)) ** (1. / p)
             epsilon = theta * epsilon
-
-        act_ind = x_new > 0 # Nonempty active index set
-
-        # Compute dual iterate and two residuals
-        if any(act_ind):
-            y_act_ind_outer = bar_y[act_ind]
-            x_act_ind_outer = x_new[act_ind]  
-            weights_ind_outer = weights[act_ind]
     
-           
-            lambda_new = np.divide(np.sum(y_act_ind_outer - x_act_ind_outer), np.sum(weights_ind_outer))
-    
-            residual_alpha = (1. / n) * LA.norm((bar_y - x_new) * x_new - p * lambda_new * x_new ** p, 1)
-            residual_beta = (1. / n) * error_appro
-    
-            res_alpha.append(residual_alpha)
-            res_beta.append(residual_beta)
-    
-            # Step 6 in IRBP. Set k <--- (k+1)
-            starting_point = x_new.copy()  
-
-        # Check the stopping criteria
-        if max(residual_alpha, residual_beta) < tol * max(max(res_alpha[0], res_beta[0]),
-                                                              1) or cnt >= max_iteration_num:
-            x_final = signum * x_new # symmetric property of lp ball
-            dual = lambda_new
-            break
+        # Step 6 in IRBP. Set k <--- (k+1)
+        starting_point = x_new.copy()
         
-    return x_final, dual
+    return x_final, lamb, timeEnd-timeStart

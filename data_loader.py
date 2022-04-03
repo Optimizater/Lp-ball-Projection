@@ -8,17 +8,17 @@ Created on Mon Sep 27 15:32:16 2021
 
 import numpy as np
 
-def point_projected(N) -> float:
-    '''Generate the point to be projected.
-    
-    Args: 
-        N: the length of the point to be projected.
-        
+def point_projected(n: int) -> float:
+    """AI is creating summary for point_projected
+
+    Args:
+        n (int): [The length of the point to be projected.]
+
     Returns:
-        data: The point follows the standard Normal distribution.
-    '''
+        data (float): [The point to be projected, following the standard Normal distribution.]
+    """    
     
     mu, sigma = 0., 1. 
-    data = np.random.normal(mu,sigma,N)
-    
+    data = np.random.normal(mu,sigma,n)
+
     return data

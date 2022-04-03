@@ -11,8 +11,7 @@ from numpy import linalg as LA
 import irbp_lib
 
 
-
-def get_sol(point_to_be_projected, p, radius) -> float:
+def get_sol(point_to_be_projected: float, p: float, radius: float) -> float:
     """Test irbp.
 
     Args:
@@ -25,13 +24,21 @@ def get_sol(point_to_be_projected, p, radius) -> float:
     """
     
     data_dim = point_to_be_projected.shape[0]
+    
     #%% Initialization
-    x_ini = np.zeros(data_dim, dtype= np.float64)
+    x_ini = np.zeros(data_dim, dtype=np.float64)
         
-    rand_num = np.random.uniform(0, 1, data_dim)
+    rand_num = np.random.uniform(0., 1., data_dim)
     rand_num_norm = LA.norm(rand_num, ord=1)
     epsilon_ini = 0.9 * (rand_num * radius / rand_num_norm) ** (1. / p) # ensure that the point is feasible.
         
-    x_irbp, dual  = irbp_lib.get_lp_ball_projection(x_ini, point_to_be_projected, p, radius, epsilon_ini)
+    x_irbp, dual, Runtime  = irbp_lib.get_lp_ball_projection(x_ini, 
+                                             point_to_be_projected, 
+                                                                 p, 
+                                                            radius, 
+                                                       epsilon_ini,
+                                                           tau=1.1, 
+                                                          tol=1e-8, 
+                                                     MAX_ITER=1000)
         
-    return x_irbp
+    return x_irbp, dual, Runtime

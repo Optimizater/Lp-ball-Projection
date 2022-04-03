@@ -20,7 +20,7 @@ if __name__ == '__main__':
     radius = 1. # radius of the lp-ball
     point_to_be_projected = data_loader.point_projected(data_dim) # follow from N~(0,radius/data_dim)
     
-    x_irbp, dual, Runtime = run_irbp_lib.get_sol(point_to_be_projected,p,radius)
+    x_irbp, dual, RunningTime = run_irbp_lib.get_sol(point_to_be_projected,p,radius)
     
     
     

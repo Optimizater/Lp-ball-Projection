@@ -9,7 +9,7 @@ Created on Mon Sep 27 15:32:16 2021
 import numpy as np
 
 def point_projected(n: int) -> float:
-    """AI is creating summary for point_projected
+    """Generates the point to be projected
 
     Args:
         n (int): [The length of the point to be projected.]

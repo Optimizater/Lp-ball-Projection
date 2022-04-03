@@ -81,10 +81,9 @@ def get_lp_ball_projection(starting_point: float,
         
         # Step 5 in IRBP. Set the new relaxation vector epsilon according to the proposed condition
         condition_left = LA.norm(x_new - starting_point, 2) * LA.norm(np.sign(x_new - starting_point) * weights, 2) ** tau
-        error_appro = abs(LA.norm(x_new, p) ** p - radius)  
 
         if condition_left <= condition_right:
-            theta = np.minimum(error_appro, 1. / np.sqrt(cnt)) ** (1. / p)
+            theta = np.minimum(beta_res, 1. / np.sqrt(cnt)) ** (1. / p)
             epsilon = theta * epsilon
     
         # Step 6 in IRBP. Set k <--- (k+1)

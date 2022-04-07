@@ -13,7 +13,7 @@ import run_irbp_lib
 
 if __name__ == '__main__':
     
-        
+    np.random.seed(2022)   
     data_dim = np.intc(1e3) # user-specified
     
     p = 0.5 # 0<p<1

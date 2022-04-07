@@ -32,7 +32,7 @@ def get_sol(point_to_be_projected: float, p: float, radius: float) -> float:
     rand_num_norm = LA.norm(rand_num, ord=1)
     epsilon_ini = 0.9 * (rand_num * radius / rand_num_norm) ** (1. / p) # ensure that the point is feasible.
         
-    x_irbp, dual, RunningTime  = irbp_lib.get_lp_ball_projection(x_ini, 
+    x_irbp, dual, runningTime  = irbp_lib.get_lp_ball_projection(x_ini, 
                                              point_to_be_projected, 
                                                                  p, 
                                                             radius, 
@@ -41,4 +41,4 @@ def get_sol(point_to_be_projected: float, p: float, radius: float) -> float:
                                                           tol=1e-8, 
                                                      MAX_ITER=1000)
         
-    return x_irbp, dual, RunningTime
+    return x_irbp, dual, runningTime

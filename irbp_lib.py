@@ -14,14 +14,14 @@ from numpy import linalg as LA
 import alternating_proj_lib
 
 
-def get_lp_ball_projection(starting_point: float, 
-                    point_to_be_projected: float, 
-                                        p: float, 
-                                   radius: float, 
-                                  epsilon: float,
+def get_lp_ball_projection(starting_point, 
+                    point_to_be_projected, 
+                                        p, 
+                                   radius, 
+                                  epsilon,
                                   tau=1.1, 
                                   tol=1e-8, 
-                                  MAX_ITER=1000,**kwargs) -> float:
+                                  MAX_ITER=1000,**kwargs):
     
     """Gets the lp ball projection of given point.
 

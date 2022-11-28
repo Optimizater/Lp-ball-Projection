@@ -8,7 +8,7 @@ Created on Mon Sep 27 15:32:16 2021
 
 import numpy as np
 
-def point_projected(n: int) -> float:
+def point_projected(n: int):
     """Generates the point to be projected
 
     Args:
@@ -19,6 +19,5 @@ def point_projected(n: int) -> float:
     """    
     
     mu, sigma = 0., 1. 
-    data = np.random.normal(mu,sigma,n)
 
-    return data
+    return np.random.normal(mu,sigma,n)

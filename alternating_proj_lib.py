@@ -9,7 +9,7 @@ This lib contains utils to do l1-ball projection.
 import numpy as np
 
 
-def get_hyperplane_projection(point_to_be_projected_act: float, weights_act: float, radius: float) -> float:
+def get_hyperplane_projection(point_to_be_projected_act, weights_act, radius):
     """Gets the hyperplane projection of a given point.
     
     Args:
@@ -34,7 +34,7 @@ def get_hyperplane_projection(point_to_be_projected_act: float, weights_act: flo
     return x_sub, dual
 
 
-def get_weightedl1_ball_projection(point_to_be_projected, weights, radius) -> float:
+def get_weightedl1_ball_projection(point_to_be_projected, weights, radius):
     """Gets the weighted l1 ball projection of given point.
     
     Args:

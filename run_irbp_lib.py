@@ -11,7 +11,7 @@ from numpy import linalg as LA
 import irbp_lib
 
 
-def get_sol(point_to_be_projected: float, p: float, radius: float) -> float:
+def get_sol(point_to_be_projected, p, radius):
     """Test irbp.
 
     Args:
@@ -25,7 +25,7 @@ def get_sol(point_to_be_projected: float, p: float, radius: float) -> float:
     
     data_dim = point_to_be_projected.shape[0]
     
-    #%% Initialization
+    # Initialization
     x_ini = np.zeros(data_dim, dtype=np.float64)
         
     rand_num = np.random.uniform(0., 1., data_dim)

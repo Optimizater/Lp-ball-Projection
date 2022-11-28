@@ -3,4 +3,4 @@ Numerical implementation for solving the Euclidean projection onto the nonconvex
 
 Please refer to
 
-["Towards an efficient approach for the nonconvex $\ell_p$-ball projection: algorithm and analysis"](https://arxiv.org/abs/2101.01350), by Xiangyu Yang and Jiashan Wang and Hao Wang.
+["Towards an efficient approach for the nonconvex $\ell_p$-ball projection: algorithm and analysis"](https://jmlr.org/papers/volume23/21-0133/21-0133.pdf), by Xiangyu Yang, Jiashan Wang and Hao Wang.
